@@ -1,22 +1,21 @@
-const STATE_FLAG = "initialized"
+const TOP_KEY = "time_tracker"
 
 class Storage {
   constructor(o) {
-    if (window.localStorage.getItem("state") === STATE_FLAG)
+    if (window.localStorage.getItem(TOP_KEY))
       return
 
-    this.clear()
-    this.set("state", STATE_FLAG)
+    window.localStorage.setItem(TOP_KEY, "{}")
     for (let [k, v] of Object.entries(o))
       this.set(k, v)
   }
   set(key, value) {
-    if (typeof(value) === 'object') value = JSON.stringify(value)
-    console.log(`set storage.${key} = ${value}`)
-    window.localStorage.setItem(key, value)
+    let current = JSON.parse(window.localStorage.getItem(TOP_KEY))
+    current[key] = value
+    window.localStorage.setItem(TOP_KEY, JSON.stringify(current))
   }
   get(key, fallback = null) {
-    let value = window.localStorage.getItem(key)
+    let value = JSON.parse(window.localStorage.getItem(TOP_KEY))[key]
     if (value == null) return fallback
     try { return JSON.parse(value) } catch { return value }
   }
