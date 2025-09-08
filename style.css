@@ -1,0 +1,88 @@
+:root {
+  color-scheme: light dark;
+  --fg: light-dark(black, white);
+  --bg: light-dark(white, black);
+  --gray: #555555;
+  --red: #CC0000;
+  --green: #6AA84F;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: monospace;
+  padding: 0;
+  margin: 0;
+}
+
+.button {
+  border: 1px solid var(--fg);
+  width: fit-content;
+  padding: 5px;
+  box-sizing: border-box;
+}
+
+.projects-container {
+  margin: 5px;
+  display: flex;
+  flex-direction: column;
+  row-gap: 5px;
+}
+
+.projects-header {
+  border: 1px solid var(--fg);
+  padding: 5px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.projects-count::before {
+  content: "total projects: ";
+}
+
+.projects-list {
+  display: flex;
+  flex-direction: column;
+  row-gap: 5px;
+}
+
+.project-container {
+  border: 1px solid var(--fg);
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  row-gap: 5px;
+}
+
+.project-name-input {
+  border: 1px solid var(--fg);
+  margin: 0px;
+  padding: 3px;
+  text-align: center;
+  font-family: monospace;
+  font-size: inherit;
+  width: 100%;
+  background-color: var(--bg);
+  box-sizing: border-box;
+}
+
+.time-created::before { content: "created: "; }
+.time-last-start::before { content: "last session: "; }
+.session-count::before { content: "sessions: "; }
+
+.toggle-button[running="true"]::before { content: "started, click to stop"; }
+.toggle-button[running="false"]::before{ content: "stopped, click to start";}
+.toggle-button[running="true"] { background-color: var(--green); }
+.toggle-button[running="false"] { background-color: var(--red); }
+
+.cancel-button::before { content: "cancel session"; }
+.cancel-button[running="false"] { opacity: 50%; }
+
+.reset-button::before { content: "reset"; }
+
+.time { font-size: 200%; }
+.duration-total::before { content: "total duration: "; }
+.duration-curr-session::before { content: "session duration: "; }
+.duration-last-session::before { content: "last session duration: "; }
