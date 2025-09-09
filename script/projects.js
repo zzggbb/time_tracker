@@ -53,7 +53,7 @@ class Projects {
     return ELEMENT("div", { "class": "projects-container" }, null, [
       ELEMENT("div", {"class": "projects-header"}, null, [
         this.project_counter.element,
-        ELEMENT("div", {"class":"button add-button"}, "new project", null, () => {
+        ELEMENT("div", {"class":"button add-button"}, null, null, () => {
           this.new_project()
         })
       ]),

@@ -9,31 +9,27 @@ class Project {
     this.duration_last_session = duration_last_session
     this.running = running
     this.session_count = session_count
-
-    this.time_last_start_element = ELEMENT("div", {"class":"time-last-start"},
-      this.time_last_start === null ? "never" : new Date(this.time_last_start)
+    this.time_created_element = this.generate_timestamp_element(this.time_created)
+    this.time_last_start_element = this.generate_timestamp_element(this.time_last_start)
+    this.session_count_element = DIV({"class":"session-count"}, this.session_count)
+    this.duration_total_element = DIV({"class":"time duration-total"},
+      Project.format_duration(this.get_duration_total())
     )
-    this.session_count_element = ELEMENT("div", {"class":"session-count"},
-      this.session_count
+    this.duration_curr_session_element = DIV({"class":"time duration-curr-session"},
+      Project.format_duration(this.get_session_time())
     )
-    this.duration_total_element = ELEMENT("div", {"class":"time duration-total"},
-      Project.format_time(this.get_duration_total())
+    this.duration_last_session_element = DIV({"class":"time duration-last-session"},
+      this.duration_last_session ? Project.format_duration(this.duration_last_session) : "none"
     )
-    this.duration_curr_session_element = ELEMENT("div", {"class":"time duration-curr-session"},
-      Project.format_time(this.get_session_time())
-    )
-    this.duration_last_session_element = ELEMENT("div", {"class":"time duration-last-session"},
-      this.duration_last_session ? Project.format_time(this.duration_last_session) : "none"
-    )
-    this.session_toggle_element = ELEMENT("div", {
+    this.session_toggle_element = DIV({
       "class": "button toggle-button",
       "running": this.running
     }, null, null, this.session_toggle.bind(this))
-    this.session_cancel_element = ELEMENT("div", {
+    this.session_cancel_element = DIV({
       "class": "button cancel-button",
       "running": this.running
     }, null, null, this.session_cancel.bind(this))
-    this.reset_element = ELEMENT("div", {
+    this.reset_element = DIV({
       "class":"button reset-button"
     }, null, null, this.reset.bind(this))
 
@@ -42,9 +38,16 @@ class Project {
       this.update_running_durations()
     }, 10)
   }
+  generate_timestamp_element(timestamp) {
+    return DIV({"class":"timestamp"}, null,
+      Project.format_timestamp(timestamp).map((text) => {
+        return DIV({"class":"timestamp-section"}, text)
+      })
+    )
+  }
   update_running_durations() {
-    this.duration_total_element.textContent = Project.format_time(this.get_duration_total())
-    this.duration_curr_session_element.textContent = Project.format_time(this.get_session_time())
+    this.duration_total_element.textContent = Project.format_duration(this.get_duration_total())
+    this.duration_curr_session_element.textContent = Project.format_duration(this.get_session_time())
   }
   get_session_time() {
     if (!this.running) return 0
@@ -64,12 +67,12 @@ class Project {
       this.update_running_durations()
 
       this.set_backend("duration_last_session", this.duration_last_session)
-      this.duration_last_session_element.textContent = Project.format_time(this.duration_last_session)
+      this.duration_last_session_element.textContent = Project.format_duration(this.duration_last_session)
 
       this.set_backend("time_saved", this.time_saved)
       // no need to update the total duration, the window interval does it
 
-      this.duration_curr_session_element.textContent = Project.format_time(0)
+      this.duration_curr_session_element.textContent = Project.format_duration(0)
     } else {
       // start a new session
       this.time_last_start = Date.now()
@@ -80,7 +83,9 @@ class Project {
       this.session_count_element.textContent = this.session_count
 
       this.set_backend("time_last_start", this.time_last_start)
-      this.time_last_start_element.textContent = new Date(this.time_last_start)
+      let new_time_last_start_element = this.generate_timestamp_element(this.time_last_start)
+      this.time_last_start_element.replaceWith(new_time_last_start_element)
+      this.time_last_start_element = new_time_last_start_element
     }
     this.set_backend("running", this.running)
     this.session_toggle_element.setAttribute("running", this.running)
@@ -101,8 +106,8 @@ class Project {
     this.session_count_element.textContent = this.session_count
   }
   reset() {
-    let name = this.name ? `project "${this.name}"` : "the project"
-    if (!window.confirm(`Are you sure you want to reset ${name}?`))
+    let name = this.name ? `"${this.name}"` : "the project"
+    if (!window.confirm(`Do you really want to reset ${name}?`))
       return
 
     this.running = false
@@ -124,7 +129,7 @@ class Project {
 
     this.duration_last_session = null
     this.set_backend("duration_last_session", this.duration_last_session)
-    this.duration_last_session_element.textContent = Project.format_time(this.duration_last_session)
+    this.duration_last_session_element.textContent = Project.format_duration(this.duration_last_session)
 
     this.update_running_durations()
   }
@@ -148,28 +153,45 @@ class Project {
     project[key] = value
     STORAGE.set("projects", projects)
   }
-  static format_time(time_ms) {
+  static format_timestamp(time_ms) {
     if (time_ms === null)
-      return "none"
+      return ["never"]
 
-    // H:M:S:MS
+    let date = new Date(time_ms)
+    let calendar_part = date.toLocaleString("en-US", {
+      weekday: "short", month: "short", day: "2-digit", year: "numeric"
+    }).replaceAll(",", "")
+    let time_part = date.toLocaleString("en-US", {
+      timeStyle: "long",
+    })
+    return [calendar_part, time_part]
+  }
+  static format_duration(time_ms, separator=":", enable_ms=false) {
+    const unit_names = ["h", "m", "s", "ms"]
+    const unit_divisors = [1, 60, 60, 1000]
+    const unit_paddings = [3, 2, 2, 3]
+    const N = unit_names.length
+
+    if (time_ms === null) return "none"
     let t = time_ms
+    let divisor = unit_divisors.reduce((acc, x) => acc*x)
+    let output_map = {}
+    for (let i=0; i<N; i++) {
+      let unit_name = unit_names[i], unit_divisor = unit_divisors[i]
+      divisor /= unit_divisor
+      let unit_value = Math.floor(t / divisor)
+      t = t - unit_value*divisor
+      output_map[unit_name] = unit_value
+    }
+    if (!enable_ms) delete output_map["ms"]
 
-    let hours = Math.floor(t / (1000*60*60))
-    t = t - hours*1000*60*60
-
-    let minutes = Math.floor(t / (1000*60))
-    t = t - minutes*1000*60
-
-    let seconds = Math.floor(t / (1000))
-    t = t - seconds*1000
-
-    let milliseconds = Math.floor(t)
-
-    minutes = String(minutes).padStart(2, '0')
-    seconds = String(seconds).padStart(2, '0')
-    milliseconds = String(milliseconds).padStart(3, '0')
-    return `${hours}h ${minutes}m ${seconds}s ${milliseconds}ms`
+    let output = []
+    let entries = Object.entries(output_map)
+    for (let j=0; j<entries.length; j++) {
+      let [n, v] = entries[j]
+      output.push(String(v).padStart(unit_paddings[j], '0'))
+    }
+    return output.join(separator)
   }
   generate() {
     let name_input = ELEMENT("input", {
@@ -183,23 +205,49 @@ class Project {
       this.name = new_name
     }
 
-    return ELEMENT("div", {
+    return DIV({
       "class": "project-container",
       "id": this.time_created
     }, null, [
-      name_input,
-      ELEMENT("div", {"class": "button delete-button"}, "delete project", null,
-        () => { PROJECTS.del_project(this.time_created) }
-      ),
-      ELEMENT("div", {"class": "time-created"}, new Date(this.time_created)),
-      this.time_last_start_element,
-      this.session_count_element,
-      this.duration_total_element,
-      this.duration_curr_session_element,
-      this.duration_last_session_element,
-      this.session_toggle_element,
-      this.session_cancel_element,
-      this.reset_element
+      DIV({"class":"row"}, null, [
+        name_input,
+        DIV({"class":"button delete-button"}, null, null,
+          () => { PROJECTS.del_project(this.time_created) }
+        )
+      ]),
+      DIV({"class":"row timestamp-row"}, null, [
+        DIV({"class":"center"}, null, [
+          DIV({"class":"underlined"}, "created"),
+          this.time_created_element,
+        ]),
+        DIV({"class":"center"}, null, [
+          DIV({"class":"underlined"}, "sessions"),
+          this.session_count_element
+        ]),
+        DIV({"class":"center"}, null, [
+          DIV({"class":"underlined"}, "last session"),
+          this.time_last_start_element,
+        ])
+      ]),
+      DIV({"class": "row duration-row"}, null, [
+        DIV({"class":"center"}, null, [
+          DIV({"class":"underlined"}, "total"),
+          this.duration_total_element
+        ]),
+        DIV({"class":"center"}, null, [
+          DIV({"class":"underlined"}, "session"),
+          this.duration_curr_session_element
+        ]),
+        DIV({"class":"center"}, null, [
+          DIV({"class":"underlined"}, "last session"),
+          this.duration_last_session_element
+        ])
+      ]),
+      DIV({"class":"row"}, null, [
+        this.session_toggle_element,
+        this.session_cancel_element,
+        this.reset_element
+      ])
     ])
   }
 }

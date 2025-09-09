@@ -18,3 +18,7 @@ function ELEMENT(tag, attributes, text_content=null, children=null, onclick=null
 
   return e
 }
+
+function DIV(attributes, text_content=null, children=null, onclick=null) {
+  return ELEMENT("div", attributes, text_content, children, onclick)
+}

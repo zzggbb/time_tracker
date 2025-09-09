@@ -7,6 +7,23 @@
   --green: #6AA84F;
 }
 
+/* generic reusable classes */
+.button {
+  border: 1px solid var(--fg);
+  width: fit-content;
+  padding: 5px;
+  box-sizing: border-box;
+}
+.row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  column-gap: 5px;
+}
+.underlined { border-bottom: 1px solid black; }
+.center { text-align: center; }
+
+/* specific element styles */
 body {
   background-color: var(--bg);
   color: var(--fg);
@@ -14,48 +31,36 @@ body {
   padding: 0;
   margin: 0;
 }
-
-.button {
-  border: 1px solid var(--fg);
-  width: fit-content;
-  padding: 5px;
-  box-sizing: border-box;
-}
-
 .projects-container {
   margin: 5px;
   display: flex;
   flex-direction: column;
   row-gap: 5px;
 }
-
 .projects-header {
-  border: 1px solid var(--fg);
-  padding: 5px;
+  border-bottom: 4px solid var(--fg);
+  padding-bottom: 5px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
 }
-
 .projects-count::before {
   content: "total projects: ";
 }
-
+.add-button::before { content: "new"; }
 .projects-list {
   display: flex;
   flex-direction: column;
   row-gap: 5px;
 }
-
 .project-container {
-  border: 1px solid var(--fg);
-  padding: 5px;
   display: flex;
   flex-direction: column;
   row-gap: 5px;
+  padding-bottom: 5px;
+  border-bottom: 4px solid var(--fg);
 }
-
 .project-name-input {
   border: 1px solid var(--fg);
   margin: 0px;
@@ -63,26 +68,34 @@ body {
   text-align: center;
   font-family: monospace;
   font-size: inherit;
-  width: 100%;
   background-color: var(--bg);
   box-sizing: border-box;
+  flex-grow: 1;
+}
+.delete-button::before { content: "delete"; }
+/*.timestamp-row { justify-content: space-evenly; }
+.duration-row { justify-content: space-evenly; }
+*/
+.toggle-button { color: white; }
+.toggle-button[running="true"]::before { content: "started"; }
+.toggle-button[running="false"]::before{ content: "stopped";}
+.toggle-button[running="true"] {
+  background-color: var(--green);
+  border-color: var(--green);
+}
+.toggle-button[running="false"] {
+  background-color: var(--red);
+  border-color: var(--red);
 }
 
-.time-created::before { content: "created: "; }
-.time-last-start::before { content: "last session: "; }
-.session-count::before { content: "sessions: "; }
-
-.toggle-button[running="true"]::before { content: "started, click to stop"; }
-.toggle-button[running="false"]::before{ content: "stopped, click to start";}
-.toggle-button[running="true"] { background-color: var(--green); }
-.toggle-button[running="false"] { background-color: var(--red); }
-
 .cancel-button::before { content: "cancel session"; }
-.cancel-button[running="false"] { opacity: 50%; }
+.cancel-button[running="false"] { visibility: hidden; }
 
+.reset-button { margin-left: auto; }
 .reset-button::before { content: "reset"; }
 
-.time { font-size: 200%; }
-.duration-total::before { content: "total duration: "; }
-.duration-curr-session::before { content: "session duration: "; }
-.duration-last-session::before { content: "last session duration: "; }
+.time { font-size: 175%; }
+/*.duration-total::before { content: "total: "; }
+.duration-curr-session::before { content: "session: "; }
+.duration-last-session::before { content: "last session: "; }
+*/
