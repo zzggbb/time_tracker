@@ -1,3 +1,5 @@
+"use strict";
+
 class ProjectCounter {
   constructor() {
     this.element = ELEMENT("div", {"class":"projects-count"}, this.count())
@@ -20,42 +22,41 @@ class Projects {
 
     document.querySelector("body").appendChild(this.generate())
   }
-  get_projects() {
+  get projects() {
     return STORAGE.get("projects")
   }
-  set_projects(projects) {
-    STORAGE.set("projects", projects)
+  set projects(v) {
+    STORAGE.set("projects", v)
   }
   get_project_objects() {
-    let projects = STORAGE.get("projects")
-    return Object.values(projects).map(Project.from_json)
+    //let projects = this.get_projects()
+    return Object.values(this.projects).map(Project.from_json)
+  }
+  get_project(project_key) {
+    //return this.get_projects()[project_key]
+    return this.projects[project_key]
   }
   new_project() {
     let project = new Project()
-    // backend
-    let projects = this.get_projects()
-    projects[project.time_created] = project.to_json()
-    this.set_projects(projects)
-    // frontend
     this.projects_list.appendChild(project.generate())
     this.project_counter.update()
   }
   del_project(project_key) {
     // backend
-    let projects = this.get_projects()
+    //let projects = this.get_projects()
+    let projects = this.projects
     delete projects[project_key]
-    this.set_projects(projects)
+    //this.set_projects(projects)
+    this.projects = projects
     // frontend
     document.getElementById(project_key).remove()
     this.project_counter.update()
   }
   generate(){
-    return ELEMENT("div", { "class": "projects-container" }, null, [
-      ELEMENT("div", {"class": "projects-header"}, null, [
+    return DIV({ "class": "projects-container" }, null, [
+      DIV({"class": "projects-header"}, null, [
         this.project_counter.element,
-        ELEMENT("div", {"class":"button add-button"}, null, null, () => {
-          this.new_project()
-        })
+        DIV({"class":"button add-button"}, "new", null, this.new_project.bind(this))
       ]),
       this.projects_list
     ])

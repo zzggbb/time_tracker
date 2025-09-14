@@ -48,7 +48,6 @@ body {
 .projects-count::before {
   content: "total projects: ";
 }
-.add-button::before { content: "new"; }
 .projects-list {
   display: flex;
   flex-direction: column;
@@ -72,10 +71,6 @@ body {
   box-sizing: border-box;
   flex-grow: 1;
 }
-.delete-button::before { content: "delete"; }
-/*.timestamp-row { justify-content: space-evenly; }
-.duration-row { justify-content: space-evenly; }
-*/
 .toggle-button { color: white; }
 .toggle-button[running="true"]::before { content: "started"; }
 .toggle-button[running="false"]::before{ content: "stopped";}
@@ -88,14 +83,8 @@ body {
   border-color: var(--red);
 }
 
-.cancel-button::before { content: "cancel session"; }
 .cancel-button[running="false"] { visibility: hidden; }
 
 .reset-button { margin-left: auto; }
-.reset-button::before { content: "reset"; }
 
 .time { font-size: 175%; }
-/*.duration-total::before { content: "total: "; }
-.duration-curr-session::before { content: "session: "; }
-.duration-last-session::before { content: "last session: "; }
-*/

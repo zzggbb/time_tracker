@@ -1,3 +1,5 @@
+"use strict";
+
 const TOP_KEY = "time_tracker"
 
 class Storage {
